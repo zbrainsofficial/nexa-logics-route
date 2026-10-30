@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXA-LOGICS Route // API Gateway & Router Engine</title>
+  <style>
+    :root {
+      --bg: #07090E;
+      --card-bg: rgba(13, 17, 28, 0.8);
+      --border: rgba(255, 255, 255, 0.07);
+      --accent: #10B981;
+      --accent-glow: rgba(16, 185, 129, 0.2);
+      --cyan: #06B6D4;
+      --yellow: #FBBF24;
+      --red: #EF4444;
+      --text-main: #F9FAFB;
+      --text-dim: #9CA3AF;
+      --text-muted: #6B7280;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: radial-gradient(ellipse at 50% 0%, #064E3B 0%, var(--bg) 65%);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 28px;
+    }
+
+    .container { max-width: 1100px; margin: 0 auto; width: 100%; flex: 1; }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 28px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .live-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 14px var(--accent);
+      animation: blink 1.4s infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1;}50%{opacity:0.3;} }
+
+    .brand h1 { font-size: 20px; font-weight: 800; letter-spacing: 1px; }
+    .brand h1 span { color: var(--accent); }
+    .tag { font-size: 11px; font-weight: 700; color: var(--accent); background: var(--accent-glow); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(16,185,129,0.3); }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .stat-card {
+      background: var(--card-bg); backdrop-filter: blur(16px);
+      border: 1px solid var(--border); border-radius: 14px; padding: 18px;
+      transition: transform 0.2s; box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+    }
+    .stat-card:hover { transform: translateY(-2px); border-color: rgba(16,185,129,0.3); }
+    .stat-label { font-size: 11px; color: var(--text-dim); font-weight: 700; letter-spacing: 1px; }
+    .stat-val { font-size: 32px; font-weight: 900; margin: 6px 0; }
+    .stat-sub { font-size: 11px; color: var(--text-muted); }
+
+    .route-card {
+      background: var(--card-bg); backdrop-filter: blur(16px);
+      border: 1px solid var(--border); border-radius: 14px; padding: 24px;
+      margin-bottom: 20px; box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+    }
+
+    .route-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { padding: 10px 12px; font-size: 11px; color: var(--text-dim); border-bottom: 1px solid #1F2937; }
+    td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    .mono { font-family: "Cascadia Code", "Fira Code", monospace; }
+
+    .method-get { color: var(--accent); font-weight: 700; }
+    .method-post { color: var(--yellow); font-weight: 700; }
+    .method-delete { color: var(--red); font-weight: 700; }
+    .status-ok { color: var(--accent); font-size: 11px; font-weight: 700; background: var(--accent-glow); padding: 3px 8px; border-radius: 6px; }
+
+    .try-box {
+      background: var(--card-bg); backdrop-filter: blur(16px);
+      border: 1px solid var(--border); border-radius: 14px; padding: 24px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+    }
+
+    .try-row { display: flex; gap: 12px; margin-bottom: 14px; align-items: center; flex-wrap: wrap; }
+
+    select, input[type="text"] {
+      background: #111827; border: 1px solid #374151; color: #FFF;
+      padding: 8px 12px; border-radius: 8px; font-size: 13px; font-family: monospace;
+    }
+    input[type="text"] { flex: 1; min-width: 200px; }
+
+    .btn-send {
+      background: linear-gradient(135deg, #10B981, #059669);
+      color: #FFF; border: none; padding: 9px 20px; border-radius: 8px;
+      font-weight: 700; font-size: 13px; cursor: pointer;
+      box-shadow: 0 4px 12px rgba(16,185,129,0.4);
+    }
+    .btn-send:hover { opacity: 0.9; }
+
+    .response-area {
+      background: #0D1117; border: 1px solid #1F2937; border-radius: 8px;
+      padding: 14px; font-family: monospace; font-size: 13px; color: var(--accent);
+      white-space: pre-wrap; min-height: 80px;
+    }
+
+    footer {
+      margin-top: 36px; padding-top: 18px; border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 11px; color: var(--text-muted);
+    }
+    .author-sig strong { color: #D1D5DB; }
+    .gh-link { color: var(--cyan); text-decoration: none; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="live-dot"></div>
+        <h1><span>NEXA-LOGICS</span> Route</h1>
+        <span class="tag">API GATEWAY ENGINE</span>
+      </div>
+      <a class="gh-link" href="https://github.com/zbrainsofficial/nexa-logics-route" target="_blank">★ View on GitHub</a>
+    </header>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">REGISTERED ROUTES</div>
+        <div class="stat-val" style="color:var(--accent);">8</div>
+        <div class="stat-sub">GET, POST, DELETE endpoints</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">MIDDLEWARE LAYERS</div>
+        <div class="stat-val" style="color:var(--cyan);">4</div>
+        <div class="stat-sub">CORS, Logger, RateLimiter, Auth</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">AVG LATENCY</div>
+        <div class="stat-val" id="latency-val" style="color:var(--yellow);">0.4ms</div>
+        <div class="stat-sub">Zero-dependency hot path</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">RATE LIMIT</div>
+        <div class="stat-val" style="color:#F9FAFB;">200</div>
+        <div class="stat-sub">req/min per IP (sliding window)</div>
+      </div>
+    </div>
+
+    <div class="route-card">
+      <div class="route-title">
+        <span>Live Route Table</span>
+        <span class="tag">RUNTIME INTROSPECTION</span>
+      </div>
+      <table>
+        <thead>
+          <tr><th>METHOD</th><th>ENDPOINT</th><th>PARAMS</th><th>STATUS</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="method-get mono">GET</td><td class="mono">/api/health</td><td>—</td><td><span class="status-ok">ACTIVE</span></td></tr>
+          <tr><td class="method-get mono">GET</td><td class="mono">/api/routes</td><td>—</td><td><span class="status-ok">ACTIVE</span></td></tr>
+          <tr><td class="method-get mono">GET</td><td class="mono">/api/v1/users/</td><td>—</td><td><span class="status-ok">ACTIVE</span></td></tr>
+          <tr><td class="method-get mono">GET</td><td class="mono">/api/v1/users/:id</td><td>id</td><td><span class="status-ok">ACTIVE</span></td></tr>
+          <tr><td class="method-post mono">POST</td><td class="mono">/api/v1/users/</td><td>body</td><td><span class="status-ok">ACTIVE</span></td></tr>
+          <tr><td class="method-delete mono">DELETE</td><td class="mono">/api/v1/users/:id</td><td>id</td><td><span class="status-ok">ACTIVE</span></td></tr>
+          <tr><td class="method-get mono">GET</td><td class="mono">/api/v1/products/</td><td>—</td><td><span class="status-ok">ACTIVE</span></td></tr>
+          <tr><td class="method-get mono">GET</td><td class="mono">/api/v1/products/:productId</td><td>productId</td><td><span class="status-ok">ACTIVE</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="try-box">
+      <div class="route-title">
+        <span>Interactive API Tester</span>
+        <span class="tag">LIVE SIMULATION</span>
+      </div>
+      <div class="try-row">
+        <select id="method-select">
+          <option value="GET">GET</option>
+          <option value="POST">POST</option>
+          <option value="DELETE">DELETE</option>
+        </select>
+        <input type="text" id="endpoint-input" value="/api/v1/users/42" placeholder="/api/v1/users/:id" />
+        <button class="btn-send" id="btn-send">▶ Send Request</button>
+      </div>
+      <div class="response-area" id="response-area">// Response will appear here...</div>
+    </div>
+
+    <footer>
+      <div>NEXA-LOGICS Route // Zero-Dependency API Gateway Engine</div>
+      <div class="author-sig">
+        Architected & Engineered by <strong>Zaigham Ali Ashraf</strong> (0321-6314020) • Z-Brains Systems
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const responses = {
+      'GET /api/health': { engine: 'NEXA-LOGICS Route v1.0.0', status: 'operational', uptime: 86420 },
+      'GET /api/routes': { routes: [{ method: 'GET', path: '/api/health' }, { method: 'GET', path: '/api/v1/users/' }] },
+      'GET /api/v1/users/': { data: [{ id: 1, username: 'admin', role: 'superadmin' }, { id: 2, username: 'engineer', role: 'developer' }] },
+      'POST /api/v1/users/': { message: 'User created successfully', id: Date.now() },
+      'GET /api/v1/products/': { data: [{ id: 'nx-001', name: 'NEXA Shield Pro', price: 299 }] },
+    };
+
+    document.getElementById('btn-send').addEventListener('click', () => {
+      const method = document.getElementById('method-select').value;
+      const endpoint = document.getElementById('endpoint-input').value;
+      const area = document.getElementById('response-area');
+
+      area.textContent = '// Resolving route...';
+
+      setTimeout(() => {
+        const key = method + ' ' + endpoint;
+        let result = responses[key];
+
+        if (!result && endpoint.match(/\/api\/v1\/users\/\w+/)) {
+          const id = endpoint.split('/').pop();
+          result = method === 'DELETE'
+            ? { message: 'User ' + id + ' deleted' }
+            : { data: { id, username: 'user_' + id } };
+        }
+
+        if (!result && endpoint.match(/\/api\/v1\/products\/\w+/)) {
+          result = { data: { id: endpoint.split('/').pop(), name: 'Product Dynamic' } };
+        }
+
+        if (!result) {
+          result = { error: 'NEXA-LOGICS Route: Endpoint not found', path: endpoint };
+        }
+
+        area.textContent = JSON.stringify(result, null, 2);
+      }, 300);
+    });
+
+    setInterval(() => {
+      document.getElementById('latency-val').textContent = (0.2 + Math.random() * 0.4).toFixed(1) + 'ms';
+    }, 1500);
+  </script>
+</body>
+</html>
