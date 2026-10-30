@@ -1,0 +1,28 @@
+{
+  "name": "nexa-logics-route",
+  "version": "1.0.0",
+  "description": "NEXA-LOGICS Route — Ultra-Fast Zero-Dependency HTTP Router, API Gateway & Middleware Pipeline Engine with Pattern Matching, Rate Limiting, JWT Auth, and CORS",
+  "main": "src/core/router.mjs",
+  "type": "module",
+  "bin": {
+    "nexa-route": "./src/server.mjs"
+  },
+  "scripts": {
+    "start": "node src/server.mjs",
+    "test": "node tests/router.test.mjs"
+  },
+  "keywords": [
+    "nexa-logics",
+    "router",
+    "api-gateway",
+    "http-router",
+    "middleware",
+    "rate-limiter",
+    "jwt-auth",
+    "zero-dependency",
+    "express-alternative",
+    "microservice"
+  ],
+  "author": "Zaigham Ali Ashraf (0321-6314020) - Z-Brains Systems",
+  "license": "MIT"
+}
